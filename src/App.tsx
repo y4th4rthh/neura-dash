@@ -360,7 +360,7 @@ const Dashboard: React.FC<{ currentUser: string; onLogout: () => void }> = ({ cu
                 fill="#8884d8"
                 dataKey="count"
               >
-                {analytics?.chats_by_model.map((entry, index) => (
+                {analytics?.chats_by_model.map((index:any) => (
                   <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                 ))}
               </Pie>
