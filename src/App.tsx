@@ -50,7 +50,7 @@ const LoginPage: React.FC<{ onLogin: (userId: string) => void }> = ({ onLogin })
       });
 
       const data = await response.json();
-      
+
       if (response.ok && data.user_id) {
         onLogin(data.user_id);
       } else {
@@ -161,7 +161,7 @@ const Dashboard: React.FC<{ currentUser: string; onLogout: () => void }> = ({ cu
   useEffect(() => {
     if (activeTab === 'users') {
       fetchUsers();
-    } 
+    }
   }, [activeTab, pagination.skip]);
 
   const fetchAnalytics = async () => {
@@ -193,12 +193,12 @@ const Dashboard: React.FC<{ currentUser: string; onLogout: () => void }> = ({ cu
 
   const deleteUser = async (userId: string) => {
     if (!confirm(`Are you sure you want to delete user ${userId} and all their chats?`)) return;
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/dashboard/users/${userId}`, {
         method: 'DELETE',
       });
-      
+
       if (response.ok) {
         setUsers(users.filter(user => user.user_id !== userId));
         alert('User deleted successfully');
@@ -211,7 +211,7 @@ const Dashboard: React.FC<{ currentUser: string; onLogout: () => void }> = ({ cu
     }
   };
 
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = users.filter(user =>
     user.user_id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -305,7 +305,7 @@ const Dashboard: React.FC<{ currentUser: string; onLogout: () => void }> = ({ cu
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
             <MessageCircle className="h-8 w-8 text-green-600" />
@@ -315,7 +315,7 @@ const Dashboard: React.FC<{ currentUser: string; onLogout: () => void }> = ({ cu
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
             <BarChart className="h-8 w-8 text-purple-600" />
@@ -355,182 +355,195 @@ const Dashboard: React.FC<{ currentUser: string; onLogout: () => void }> = ({ cu
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ model, percent }) => `${model} ${(percent * 100).toFixed(0)}%`}
+                label={({ model, percent }: any) => {
+                  let displayName = model;
+
+                  if (model === 'gemini' || model === 'neura.essence1.o') {
+                    displayName = 'neura.essence1.o';
+                  } else if (model === 'groq') {
+                    displayName = 'neura.swift1.o';
+                  }
+
+                  return `${displayName} ${(percent * 100).toFixed(0)}%`;
+                }}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="count"
               >
-                {analytics?.chats_by_model.map((index:any) => (
+              {analytics?.chats_by_model.map((entry: any, index: any) => {
+                console.log(entry);
+                return (
                   <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+                );
+              })}
 
-      {/* Top Users */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-lg font-semibold mb-4">Top Active Users</h3>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={analytics?.top_users}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="user_id" />
-            <YAxis />
+            </Pie>
             <Tooltip />
-            <Bar dataKey="chat_count" fill="#10B981" />
-          </BarChart>
+          </PieChart>
         </ResponsiveContainer>
       </div>
     </div>
+
+      {/* Top Users */ }
+  <div className="bg-white p-6 rounded-lg shadow-sm border">
+    <h3 className="text-lg font-semibold mb-4">Top Active Users</h3>
+    <ResponsiveContainer width="100%" height={250}>
+      <BarChart data={analytics?.top_users}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="user_id" />
+        <YAxis />
+        <Tooltip />
+        <Bar dataKey="chat_count" fill="#10B981" />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+    </div >
   );
 
-  const renderUsers = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Users Management</h2>
-        <button
-          onClick={fetchUsers}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
-        </button>
-      </div>
+const renderUsers = () => (
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <h2 className="text-2xl font-bold">Users Management</h2>
+      <button
+        onClick={fetchUsers}
+        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+      >
+        <RefreshCw className="h-4 w-4 mr-2" />
+        Refresh
+      </button>
+    </div>
 
-      <div className="flex items-center space-x-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Chat Count
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Last Activity
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
-                <tr key={user._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{user.user_id}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{user.chat_count}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {user.last_activity ? formatDate(user.last_activity) : 'No activity'}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => deleteUser(user.user_id)}
-                      className="text-red-600 hover:text-red-900 inline-flex items-center"
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {renderPagination()}
+    <div className="flex items-center space-x-4">
+      <div className="flex-1 relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+        <input
+          type="text"
+          placeholder="Search users..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
       </div>
     </div>
-  );
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="mt-1 text-sm text-gray-600">
-                Monitor and manage your application's users and chats
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              {loading && (
-                <div className="flex items-center text-gray-600">
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Loading...
-                </div>
-              )}
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <User className="h-4 w-4" />
-                <span>Welcome, {currentUser}</span>
+    <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                User ID
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Chat Count
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Last Activity
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {filteredUsers.map((user) => (
+              <tr key={user._id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{user.user_id}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{user.chat_count}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">
+                    {user.last_activity ? formatDate(user.last_activity) : 'No activity'}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                  <button
+                    onClick={() => deleteUser(user.user_id)}
+                    disabled={user.user_id == "admin"}
+                    className={`text-red-600 hover:text-red-900 inline-flex items-center ${user.user_id === "admin" ? 'opacity-40 cursor-not-allowed':''}` }
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {renderPagination()}
+    </div>
+  </div>
+);
+
+return (
+  <div className="min-h-screen bg-gray-50">
+    <div className="bg-white shadow-sm border-b">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center py-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="mt-1 text-sm text-gray-600">
+              Monitor and manage your application's users and chats
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            {loading && (
+              <div className="flex items-center text-gray-600">
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Loading...
               </div>
-              <button
-                onClick={onLogout}
-                className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <LogOut className="h-4 w-4 mr-1" />
-                Logout
-              </button>
+            )}
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <User className="h-4 w-4" />
+              <span>Welcome, {currentUser}</span>
             </div>
+            <button
+              onClick={onLogout}
+              className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <LogOut className="h-4 w-4 mr-1" />
+              Logout
+            </button>
           </div>
         </div>
       </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation Tabs */}
-        <div className="border-b border-gray-200 mb-8">
-          <nav className="-mb-px flex space-x-8">
-            <button
-              onClick={() => setActiveTab('analytics')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'analytics'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Analytics
-            </button>
-            <button
-              onClick={() => setActiveTab('users')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'users'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Users ({users.length})
-            </button>
-          </nav>
-        </div>
-
-        {/* Tab Content */}
-        {activeTab === 'analytics' && renderAnalytics()}
-        {activeTab === 'users' && renderUsers()}
-      </div>
     </div>
-  );
+
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Navigation Tabs */}
+      <div className="border-b border-gray-200 mb-8">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'analytics'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+          >
+            Analytics
+          </button>
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'users'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+          >
+            Users ({users.length})
+          </button>
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'analytics' && renderAnalytics()}
+      {activeTab === 'users' && renderUsers()}
+    </div>
+  </div>
+);
 };
 
 const App: React.FC = () => {
