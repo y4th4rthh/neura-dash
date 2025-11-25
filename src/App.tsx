@@ -618,7 +618,7 @@ import {
   EyeOff,
   LayoutDashboard,
 } from "lucide-react"
-import "./app.css"
+import "./App.css"
 
 interface AdminUser {
   _id: string
@@ -1179,4 +1179,5 @@ export default function App() {
     <LoginPage onLogin={handleLogin} />
   )
 }
+
 
