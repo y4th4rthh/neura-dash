@@ -968,13 +968,16 @@ const Dashboard: React.FC<{ currentUser: string; onLogout: () => void }> = ({ cu
                   } else if (model === "groq") {
                     displayName = "neura.swift1.o"
                   }
+                  else {
+                    displayName = model
+                  }
                   return `${displayName} ${(percent * 100).toFixed(0)}%`
                 }}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="count"
               >
-                {analytics?.chats_by_model.map((entry: any, index: any) => (
+                {analytics?.chats_by_model.map((_: any, index: any) => (
                   <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                 ))}
               </Pie>
@@ -1176,3 +1179,4 @@ export default function App() {
     <LoginPage onLogin={handleLogin} />
   )
 }
+
