@@ -356,8 +356,13 @@ const Dashboard: React.FC<{ currentUser: string; onLogout: () => void }> = ({ cu
                 cy="50%"
                 labelLine={false}
                 label={({ model, percent }: any) => {
-                  let displayName = model;
-
+                  let displayName='';
+                  if (model === "neura.essence1.o" || model ==="neura.swift1.o" || model ==="neura.infinity1.o" || model === "gemini" || model  === "groq"){
+                    displayName = model;
+                  }
+                  else{
+                    displayName="neura.essence1.o"
+                  }
                   if (model === 'gemini' || model === 'neura.essence1.o') {
                     displayName = 'neura.essence1.o';
                   } else if (model === 'groq') {
@@ -579,3 +584,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
